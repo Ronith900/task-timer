@@ -2,29 +2,17 @@ import React, { Component } from "react";
 import Section from "./components/task";
 import NavBar from "./components/navbar";
 import SectionForm from "./components/sectionForm";
+import {
+  handleTaskSubmit,
+  getSections,
+  handeleSubmit,
+} from "./services/fakeModuleService";
 
 class App extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      sections: [
-        {
-          sectionName: "GVX",
-          id: 1,
-          tasks: [
-            { name: "T1", id: 11, time: 0, isRunning: false, timer: null },
-            { name: "T1", id: 12, time: 0, isRunning: false, timer: null },
-          ],
-        },
-        {
-          sectionName: "GMP",
-          id: 2,
-          tasks: [
-            { name: "T1", id: 21, time: 0, isRunning: false, timer: null },
-            { name: "T1", id: 2, time: 0, isRunning: false, timer: null },
-          ],
-        },
-      ],
+      sections: getSections(),
     };
   }
 
@@ -47,25 +35,13 @@ class App extends Component {
   }
 
   handeleSubmit = (e) => {
-    const newModuleID = this.getModuleID();
-    const { sections } = this.state;
-    sections.push({ sectionName: e, id: newModuleID, tasks: [] });
-    this.setState({ sections });
+    handeleSubmit(e);
+    this.setState({ sections: getSections() });
   };
 
   handleTaskSubmit = (e, s_id) => {
-    const { sections } = this.state;
-    const secIndex = sections.findIndex((s) => s.id === s_id);
-    console.log(sections, secIndex);
-    const section = sections[secIndex];
-    section.tasks.push({
-      id: this.getNewTaskId(section),
-      name: e,
-      time: 0,
-      isRunning: false,
-      timer: null,
-    });
-    this.setState({ sections });
+    handleTaskSubmit(e, s_id);
+    this.setState({ sections: getSections() });
   };
 
   handleStart = (sectionId, taskId) => {
@@ -76,11 +52,11 @@ class App extends Component {
             ...section,
             tasks: section.tasks.map((task) => {
               if (task.id === taskId && !task.isRunning) {
-                const startTime = Date.now(); // Record the start time
+                const startTime = task.startTime || Date.now(); // Use existing startTime if available, otherwise use current time
                 const timer = setInterval(() => {
                   const elapsedTime = Math.floor(
-                    (Date.now() - startTime) / 1000
-                  ); // Calculate elapsed time in seconds
+                    (Date.now() - startTime + task.time) / 1000
+                  ); // Calculate elapsed time in seconds, considering already elapsed time
                   this.setState((prevState) => ({
                     sections: prevState.sections.map((sec) => {
                       if (sec.id === sectionId) {
@@ -91,6 +67,7 @@ class App extends Component {
                               return {
                                 ...t,
                                 time: elapsedTime,
+                                startTime: startTime, // Store the startTime
                               };
                             }
                             return t;
@@ -105,6 +82,7 @@ class App extends Component {
                   ...task,
                   isRunning: true,
                   timer: timer,
+                  startTime: startTime, // Set the startTime
                 };
               }
               return task;

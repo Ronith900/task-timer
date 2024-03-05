@@ -55,8 +55,15 @@ class Section extends Component {
           <div className="col-md-4 col-12 mt-2">
             <div className="card">
               <div className="card-body">
-                <h5 class="card-title">{sec.sectionName}</h5>
-                <SectionForm onSubmitt={this.props.onTaskSubmit} sid={sec.id} />
+                <h5 class="card-title">
+                  {sec.sectionName}
+                  <span>
+                    <SectionForm
+                      onSubmitt={this.props.onTaskSubmit}
+                      sid={sec.id}
+                    />
+                  </span>
+                </h5>
                 <ul class="list-group list-group-flush">
                   {sec.tasks.map((task) => (
                     <li
